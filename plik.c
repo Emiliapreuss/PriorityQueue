@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include<string.h>
+#include <string.h>
 
 struct element {
-    char value[50] ;
+	char value[50];
 	struct element* next;
 	struct element* previous;
 	int priority;
@@ -13,19 +13,16 @@ struct queue {
 	struct element* last;
 };
 
-
 void push(struct element* e, struct queue* q)
 {
 	e->priority = 0;
 	e->next = NULL;
-	//gdy kolejka jest pusta:
-	if (q->first == NULL)
+	if (q->first == NULL) //empty queue
 	{
 		e->previous = NULL;
 		q->first = q->last = e;
-
 	}
-	else //kolejka mia³a ju¿ inne wartoœci 
+	else
 	{
 		e->previous = q->last;
 		q->last->next = e;
@@ -33,19 +30,17 @@ void push(struct element* e, struct queue* q)
 	}
 }
 
-
 char* pop(struct queue* q)
 {
-	if (q->first )
+	if (q->first)
 	{
 		char e[50];
-		strcpy_s( e, sizeof(e),q->last->value);
-		struct element* tmp = q->last; 
+		strcpy_s(e, sizeof(e), q->last->value);
+		struct element* tmp = q->last;
 		q->last = tmp->previous;
 		if (q->last)
 		{
 			q->last->next = NULL;
-					
 		}
 		else
 		{
@@ -59,18 +54,15 @@ char* pop(struct queue* q)
 
 void insert(struct element* newElement, int prior, struct queue* q)
 {
-	
 	newElement->priority = prior;
 	struct element* tmp = q->first;
-	if (tmp == NULL) // pusta kolejka
+	if (tmp == NULL) //empty queue
 	{
-
 		newElement->previous = NULL;
 		newElement->next = NULL;
 		q->first = q->last = newElement;
-
 	}
-	else if (prior <= tmp->priority) // priorytet mniejszy od wierzcholka
+	else if (prior <= tmp->priority) // priority less or equal the first element priority
 	{
 		newElement->previous = NULL;
 		newElement->next = q->first;
@@ -78,95 +70,94 @@ void insert(struct element* newElement, int prior, struct queue* q)
 	}
 	else
 	{
-			while (tmp != NULL)
-				if (tmp->priority == prior)
-				{
-					struct element* previousOne = tmp->previous;
-					previousOne->next = newElement;
-					tmp->previous = newElement;
-					newElement->next = tmp;
-					newElement->previous = previousOne;
-					break;
-				}
-				else if (tmp->next == NULL)	
-				{
-							q->last->next = newElement;
-							newElement->previous = q->last;
-							q->last = newElement;
-							q->last->next = NULL;
-							break;
-				}
-				else
-				{
-					tmp = tmp->next;	
-				}
+		while (tmp != NULL)
+		{
+			if (tmp->priority == prior)
+			{
+				struct element* previousOne = tmp->previous;
+				previousOne->next = newElement;
+				tmp->previous = newElement;
+				newElement->next = tmp;
+				newElement->previous = previousOne;
+				break;
+			}
+			else if (tmp->next == NULL)
+			{
+				q->last->next = newElement;
+				newElement->previous = q->last;
+				q->last = newElement;
+				q->last->next = NULL;
+				break;
+			}
+			else
+			{
+				tmp = tmp->next;
+			}
+		}
 	}
-
 }
 
 void delete_by_priority(int prior, struct queue* q)
 {
-	if (q->first!= NULL)
+	if (q->first != NULL)
 	{
-		struct element* tmp = q->first; //iterator po kolejce
-		
-			while (tmp != NULL)
+		struct element* tmp = q->first; //iterator
+
+		while (tmp != NULL)
+		{
+			if (tmp->priority == prior) //first element of given priority
 			{
-				if (tmp->priority == prior) //pierwszy element o zadanym priorytecie
+				if (prior == q->last->priority)
 				{
-					if (prior == q->last->priority)
-					{   
-						q->last = tmp->previous;
-						if (q->last == NULL)//kolejka ma wszystkie el tego samego priorytetu
-						{
-							q->first == NULL; // kolejka bedzie pusta
-						}
-						else
-						{
-							q->last->next = NULL;
-						}
-						while (tmp!= NULL) //wszystkie elementy o zadanym priorytecie
-						{
-							struct element* todelete = tmp;
-							tmp = tmp->next;
-							free(todelete);
-						}
-						
-					}
-					else if (prior == q->first->priority)
+					q->last = tmp->previous;
+					if (q->last == NULL) //every element of the queue has the same priority
 					{
-						while (tmp->priority == prior) //wszystkie elementy o zadanym priorytecie
-						{
-							struct element* todelete = tmp;
-							tmp = tmp->next;
-							free(todelete);
-						}
-						tmp->previous = NULL;
-						q->first = tmp;
+						q->first == NULL; //queue will be empty
 					}
 					else
 					{
-						while (tmp->priority == prior) //wszystkie elementy o zadanym priorytecie
-						{
-							struct element* todelete = tmp;
-							tmp->previous->next = tmp->next;
-							tmp->next->previous = tmp->previous;
-							tmp = tmp->next;
-							free(todelete);
-						}
+						q->last->next = NULL;
 					}
-					
-					break;
+					while (tmp != NULL) //freeing elements
+					{
+						struct element* todelete = tmp;
+						tmp = tmp->next;
+						free(todelete);
+					}
 				}
-				tmp = tmp->next;
+				else if (prior == q->first->priority)
+				{
+					while (tmp->priority == prior) //all elements with given priority
+					{
+						struct element* todelete = tmp;
+						tmp = tmp->next;
+						free(todelete);
+					}
+					tmp->previous = NULL;
+					q->first = tmp;
+				}
+				else
+				{
+					while (tmp->priority == prior) //all elements with given priority
+					{
+						struct element* todelete = tmp;
+						tmp->previous->next = tmp->next;
+						tmp->next->previous = tmp->previous;
+						tmp = tmp->next;
+						free(todelete);
+					}
+				}
+				break;
 			}
-			printf("\n Elements with priority %i have been deleted\n", prior);
+			tmp = tmp->next;
+		}
+		printf("\n Elements with priority %i have been deleted\n", prior);
 	}
 }
 
 void print(struct queue* q)
 {
-	struct element* tmp = q->first; //pierwszy element - first kolejki
+	struct element* tmp = q->first; //first element
 
 	if (tmp == NULL) {
 		printf("\nQueue is empty\n");
@@ -178,7 +169,6 @@ void print(struct queue* q)
 			tmp = tmp->next;
 		}
 	}
-
 }
 
 struct queue merge(struct queue* q, struct queue* q1)
@@ -186,20 +176,20 @@ struct queue merge(struct queue* q, struct queue* q1)
 	struct queue w;
 	w.first = NULL;
 	w.last = NULL;
-	struct element* it = q->first, * it1 = q1->first; //iteratory po kolejkach 
+	struct element* it = q->first, * it1 = q1->first;
 	struct element* el = NULL;
 	int pr;
-	
-	while (it1 != NULL ) 
+
+	while (it1 != NULL)
 	{
-		struct element* e = (struct element*) malloc(sizeof(struct element));
-		strcpy_s(e->value, sizeof(e->value),it1->value);
+		struct element* e = (struct element*)malloc(sizeof(struct element));
+		strcpy_s(e->value, sizeof(e->value), it1->value);
 		insert(e, it1->priority, &w);
 		it1 = it1->next;
 	}
 	while (it != NULL)
 	{
-		struct element* e = (struct element*) malloc(sizeof(struct element));
+		struct element* e = (struct element*)malloc(sizeof(struct element));
 		strcpy_s(e->value, sizeof(e->value), it->value);
 		insert(e, it->priority, &w);
 		it = it->next;
@@ -218,44 +208,44 @@ void setfree(struct queue* que)
 
 int main()
 {
+	//hardcoded data to present how the program works
 	struct queue q;
 	q.first = NULL;
 	q.last = NULL;
-	struct element* e1 = (struct element*) malloc(sizeof(struct element));
+	struct element* e1 = (struct element*)malloc(sizeof(struct element));
 	strcpy_s(e1->value, sizeof(e1->value), "Jan Nowak");
-	struct element* e2 = (struct element*) malloc(sizeof(struct element));
-	strcpy_s(e2->value, sizeof(e2->value) , "Jan K");
-	struct element* e3 = (struct element*) malloc(sizeof(struct element));
-	strcpy_s(e3->value , sizeof(e3->value), "Julian K");
+	struct element* e2 = (struct element*)malloc(sizeof(struct element));
+	strcpy_s(e2->value, sizeof(e2->value), "Jan K");
+	struct element* e3 = (struct element*)malloc(sizeof(struct element));
+	strcpy_s(e3->value, sizeof(e3->value), "Julian Z");
 	push(e1, &q);
 	push(e2, &q);
 	push(e3, &q);
 	print(&q);
 
-	char write[50] ;
+	char write[50];
 	strcpy_s(write, sizeof(write), pop(&q));
 	printf("\n%s has been deleted\n", write);
 	print(&q);
-	
-	struct element* e4 = (struct element*) malloc(sizeof(struct element));
-	strcpy_s(e4->value, sizeof(e4->value), "Kuba Nowak");
+
+	struct element* e4 = (struct element*)malloc(sizeof(struct element));
+	strcpy_s(e4->value, sizeof(e4->value), "Kuba S");
 	insert(e4, 1, &q);
 	print(&q);
 
 	delete_by_priority(0, &q);
 	print(&q);
 
-	struct element* e5 = (struct element*) malloc(sizeof(struct element));
-	strcpy_s(e5->value, sizeof(e5->value),"Sebastian A");
-	struct element* e6 = (struct element*) malloc(sizeof(struct element));
-	strcpy_s(e6->value, sizeof(e6->value),  "Klaudia K");
-
+	struct element* e5 = (struct element*)malloc(sizeof(struct element));
+	strcpy_s(e5->value, sizeof(e5->value), "Sebastian A");
+	struct element* e6 = (struct element*)malloc(sizeof(struct element));
+	strcpy_s(e6->value, sizeof(e6->value), "Klaudia K");
 
 	struct queue q1;
 	q1.first = NULL;
 	q1.last = NULL;
 	insert(e5, 1, &q1);
-	insert(e6, 2,&q1);
+	insert(e6, 2, &q1);
 	print(&q1);
 	delete_by_priority(1, &q1);
 	print(&q1);
@@ -263,10 +253,10 @@ int main()
 	strcpy_s(write, sizeof(write), pop(&q1));
 	printf("\n %s has been deleted\n", write);
 	print(&q1);
-	struct element* e7 = (struct element*) malloc(sizeof(struct element));
+	struct element* e7 = (struct element*)malloc(sizeof(struct element));
 	strcpy_s(e7->value, sizeof(e7->value), "Jola Adamczyk");
-	struct element* e8 = (struct element*) malloc(sizeof(struct element));
-	strcpy_s(e8->value , sizeof(e8->value), "Zyta Jowisz");
+	struct element* e8 = (struct element*)malloc(sizeof(struct element));
+	strcpy_s(e8->value, sizeof(e8->value), "Zyta Jowisz");
 	insert(e7, 1, &q1);
 	insert(e8, 0, &q1);
 	printf("\n To merge:\n");
@@ -279,6 +269,6 @@ int main()
 	setfree(&q);
 	setfree(&q1);
 	setfree(&q2);
-	
+
 	return 0;
 }
